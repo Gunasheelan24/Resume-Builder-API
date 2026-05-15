@@ -1,0 +1,29 @@
+import { LoggerService } from './common/logger/logger.service';
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+import { ValidationPipe } from '@nestjs/common';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule, {
+    bufferLogs: true,
+  });
+
+  // logger pipe
+  app.useLogger(app.get(LoggerService));
+
+  // validation pipe
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+    }),
+  );
+
+  // application port
+  await app.listen(process.env.PORT ?? 3000);
+}
+
+bootstrap().catch((error) => {
+  console.log('================== NESTJS Server Error ==================');
+  console.log(error);
+  console.log('================== NESTJS Server Error ==================');
+});
