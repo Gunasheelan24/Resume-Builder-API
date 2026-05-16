@@ -7,7 +7,6 @@ import { ENV } from './common/util/env.constants';
 import { AuthModule } from './auth/auth.module';
 import { LoggerService } from './common/logger/logger.service';
 import { LoggerModule } from './common/logger/logger.module';
-import { AwsModule } from './aws/aws.module';
 
 @Module({
   imports: [
@@ -40,8 +39,6 @@ import { AwsModule } from './aws/aws.module';
 
     // other goes here
     LoggerModule,
-
-    AwsModule,
   ],
   controllers: [AppController],
   providers: [AppService, LoggerService],
