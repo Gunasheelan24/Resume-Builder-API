@@ -11,8 +11,7 @@ import {
   HttpResponseMessages,
   sentBackResponse,
 } from 'src/common/util/constant';
-import { type Request } from 'express';
-import { RequestWithUser } from './types/user.types';
+import type { RequestWithUser, UserSignin } from './types/user.types';
 
 @Injectable()
 export class AuthService {
@@ -73,6 +72,54 @@ export class AuthService {
 
       // if user already exist will throw this below error
       throw new UnauthorizedException('user already exist');
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.warn(error.message, error.stack);
+      } else {
+        this.logger.warn('unknow error');
+      }
+
+      throw error;
+    }
+  }
+
+  async signInToAccount(body: UserSignin) {
+    try {
+      // need to check the user is already have an account
+      const { email, password } = body;
+      const getUser = await this.userRepository.findOne({ where: { email } });
+
+      // invalid error
+      if (!getUser) {
+        throw new UnauthorizedException('Invalid credentials');
+      }
+
+      // here need to compare the password
+      const isPasswordCorrect = await this.comparePassword(
+        password,
+        getUser.password,
+      );
+
+      if (!isPasswordCorrect) {
+        throw new UnauthorizedException('Invalid credentials');
+      }
+
+      // need to generate the jwt
+      const jwtPayload = {
+        id: getUser.id,
+        email,
+      };
+      const generatedJwt = await this.generateJwtToken(jwtPayload);
+
+      // sent back response
+      return sentBackResponse<{ email: string; jwtToken: string }>(
+        {
+          email: email,
+          jwtToken: generatedJwt,
+        },
+        'User verification successful',
+        HttpStatus.ACCEPTED,
+      );
     } catch (error) {
       if (error instanceof Error) {
         this.logger.warn(error.message, error.stack);
@@ -167,6 +214,23 @@ export class AuthService {
         this.logger.error(error.message, error.stack);
       } else {
         this.logger.error('Hash Password Failed');
+      }
+
+      throw error;
+    }
+  }
+
+  async comparePassword(password: string, hashedPassword: string) {
+    try {
+      return await bcrypt.compare(password, hashedPassword);
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.warn(
+          `${error.message} In Compare Password Method`,
+          error.stack,
+        );
+      } else {
+        this.logger.warn('unknow error in compare password method');
       }
 
       throw error;
