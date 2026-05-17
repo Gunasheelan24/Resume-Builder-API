@@ -28,6 +28,7 @@ export class GoogleStrategyService extends PassportStrategy(
       firstName: profile.name?.givenName,
       lastName: profile.name?.familyName,
       picture: profile.photos?.[0]?.value,
+      provider: 'google',
     };
   }
 }

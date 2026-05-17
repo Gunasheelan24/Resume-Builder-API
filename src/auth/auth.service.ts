@@ -131,9 +131,9 @@ export class AuthService {
     }
   }
 
-  async googleSignIn(req: RequestWithUser) {
+  async oAuthSign(req: RequestWithUser) {
     try {
-      const { email, firstName, lastName, picture } = req.user;
+      const { email, firstName, lastName, picture, provider } = req.user;
 
       // Check if the google user is already exist or not
       let getuserDetails = await this.userRepository.findOne({
@@ -146,7 +146,7 @@ export class AuthService {
         const createUser = this.userRepository.create({
           email,
           fullName: `${firstName ?? ''} ${lastName ?? ''}`,
-          provider: 'google',
+          provider: provider,
           profilePicture: picture,
         });
 
@@ -170,7 +170,7 @@ export class AuthService {
       );
     } catch (error) {
       if (error instanceof Error) {
-        this.logger.error(`${error.message} Google SignIn Method`, error.stack);
+        this.logger.error(`${error.message} OAuth SignIn Method`, error.stack);
       } else {
         this.logger.warn('unknow Error at Google SignIn Method');
       }

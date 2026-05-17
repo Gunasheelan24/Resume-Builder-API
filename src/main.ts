@@ -8,6 +8,13 @@ async function bootstrap() {
     bufferLogs: true,
   });
 
+  // Cors Error
+  app.enableCors({
+    origin: 'http://localhost:5173',
+    methods: ['GET', 'POST'],
+    credentials: true,
+  });
+
   // logger pipe
   app.useLogger(app.get(LoggerService));
 

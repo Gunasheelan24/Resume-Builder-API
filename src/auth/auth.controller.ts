@@ -21,6 +21,7 @@ export class AuthController {
     return this.authService.signInToAccount(body);
   }
 
+  // Google OAuth
   @Get('google')
   @UseGuards(AuthGuard('google'))
   async googleAuth() {}
@@ -28,6 +29,18 @@ export class AuthController {
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   googleAuthRedirect(@Req() request: RequestWithUser) {
-    return this.authService.googleSignIn(request);
+    return this.authService.oAuthSign(request);
+  }
+
+  // Github OAuth
+  @Get('github')
+  @UseGuards(AuthGuard('github'))
+  async githubPassport() {}
+
+  @Get('github/callback')
+  @UseGuards(AuthGuard('github'))
+  githubCallback(@Req() request: RequestWithUser) {
+    console.log(request.user);
+    return this.authService.oAuthSign(request);
   }
 }

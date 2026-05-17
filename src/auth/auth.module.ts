@@ -6,8 +6,9 @@ import { UserEntity } from './entities/user.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { ENV } from 'src/common/util/env.constants';
-import { GoogleStrategyService } from './google.strategy.service';
+import { GoogleStrategyService } from './strategy/google.strategy.service';
 import { PassportModule } from '@nestjs/passport';
+import { GithubStrategyService } from './strategy/github.strategy.service';
 
 @Module({
   imports: [
@@ -26,6 +27,6 @@ import { PassportModule } from '@nestjs/passport';
     PassportModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, GoogleStrategyService],
+  providers: [AuthService, GoogleStrategyService, GithubStrategyService],
 })
 export class AuthModule {}
