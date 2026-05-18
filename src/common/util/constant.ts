@@ -1,11 +1,9 @@
 export function sentBackResponse<DataType>(
   data: DataType,
-  message: string,
   statusCode: number,
   isSuccessResponse = true,
 ) {
   return {
-    message,
     statusCode,
     data,
     isSuccessResponse,
@@ -14,4 +12,9 @@ export function sentBackResponse<DataType>(
 
 export const HttpResponseMessages = {
   userVerification: 'User Verification Successfull',
+};
+
+export const HttpResponseFailedMessages = {
+  invalidUser: 'Invalid credentials',
+  userExist: 'user Already Exist',
 };

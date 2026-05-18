@@ -8,10 +8,16 @@ import { Repository } from 'typeorm';
 import { LoggerService } from 'src/common/logger/logger.service';
 import { JwtService } from '@nestjs/jwt';
 import {
+  HttpResponseFailedMessages,
   HttpResponseMessages,
   sentBackResponse,
 } from 'src/common/util/constant';
-import type { RequestWithUser, UserSignin } from './types/user.types';
+import type {
+  createAccountData,
+  RequestWithUser,
+  UserSignin,
+} from './types/user.types';
+import { ApiError } from 'src/common/types/global-types';
 
 @Injectable()
 export class AuthService {
@@ -64,14 +70,16 @@ export class AuthService {
         };
 
         return sentBackResponse<{
-          email: string;
-          userName: string;
-          token: string;
-        }>(responsePayload, 'User Created Successful', HttpStatus.CREATED);
+          data: createAccountData;
+          message: string;
+        }>(
+          { data: responsePayload, message: 'User Created Successfull' },
+          HttpStatus.CREATED,
+        );
       }
 
       // if user already exist will throw this below error
-      throw new UnauthorizedException('user already exist');
+      throw new UnauthorizedException(HttpResponseFailedMessages.userExist);
     } catch (error) {
       if (error instanceof Error) {
         this.logger.warn(error.message, error.stack);
@@ -87,11 +95,14 @@ export class AuthService {
     try {
       // need to check the user is already have an account
       const { email, password } = body;
-      const getUser = await this.userRepository.findOne({ where: { email } });
+      const getUser = await this.userRepository.findOne({
+        where: { email },
+        select: { password: true, email: true, provider: true },
+      });
 
       // invalid error
       if (!getUser) {
-        throw new UnauthorizedException('Invalid credentials');
+        throw new UnauthorizedException(HttpResponseFailedMessages.invalidUser);
       }
 
       // here need to compare the password
@@ -101,7 +112,7 @@ export class AuthService {
       );
 
       if (!isPasswordCorrect) {
-        throw new UnauthorizedException('Invalid credentials');
+        throw new UnauthorizedException(HttpResponseFailedMessages.invalidUser);
       }
 
       // need to generate the jwt
@@ -112,12 +123,11 @@ export class AuthService {
       const generatedJwt = await this.generateJwtToken(jwtPayload);
 
       // sent back response
-      return sentBackResponse<{ email: string; jwtToken: string }>(
+      return sentBackResponse<{ data: createAccountData; message: string }>(
         {
-          email: email,
-          jwtToken: generatedJwt,
+          data: { email, token: generatedJwt, userName: getUser.userName },
+          message: HttpResponseMessages.userVerification,
         },
-        'User verification successful',
         HttpStatus.ACCEPTED,
       );
     } catch (error) {
@@ -161,11 +171,13 @@ export class AuthService {
       });
 
       return sentBackResponse<{
-        jwtToken: string;
-        email: string;
+        data: createAccountData;
+        message: string;
       }>(
-        { jwtToken, email },
-        HttpResponseMessages.userVerification,
+        {
+          data: { email, token: jwtToken, userName: getuserDetails.userName },
+          message: HttpResponseMessages.userVerification,
+        },
         HttpStatus.ACCEPTED,
       );
     } catch (error) {

@@ -9,6 +9,12 @@ export interface User {
   provider: string;
 }
 
+export interface createAccountData {
+  email: string;
+  userName: string;
+  token: string;
+}
+
 // Login User
 export type UserSignin = Pick<User, 'email'> & {
   password: string;
