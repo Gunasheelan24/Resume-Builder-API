@@ -24,6 +24,7 @@ export class EmailClientService {
       const templateId = this.configService.get(
         ENV.SENDGRID_TEMPLATE,
       ) as string;
+      const uiUrl = this.configService.get(ENV.UI_URL) as string;
 
       const emailPayload: MailDataRequired = {
         from: fromMailAddress,
@@ -32,6 +33,7 @@ export class EmailClientService {
         dynamicTemplateData: {
           userName: data.userName,
           OTP_CODE: data.otp,
+          RESET_URL: `${uiUrl}${'/auth/verify-otp'}`,
         },
         subject: data.subject,
       };
