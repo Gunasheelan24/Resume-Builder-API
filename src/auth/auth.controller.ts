@@ -4,6 +4,7 @@ import { CreateUserDto } from './dto/create-user';
 import { SigninUserDto } from './dto/signin-user';
 import { AuthGuard } from '@nestjs/passport';
 import { type RequestWithUser } from './types/user.types';
+import { ResetPasswordDto } from './dto/reset-password';
 
 @Controller('auth')
 export class AuthController {
@@ -17,8 +18,14 @@ export class AuthController {
 
   // SignIn Account
   @Post('signin')
-  signInToAccount(@Body() body: SigninUserDto) {
-    return this.authService.signInToAccount(body);
+  async signInToAccount(@Body() body: SigninUserDto) {
+    return await this.authService.signInToAccount(body);
+  }
+
+  // set reset password link with otp
+  @Post('reset-password')
+  sentRestPasswordOtp(@Body() body: ResetPasswordDto) {
+    return this.authService.sentResetPasswordOtp(body);
   }
 
   // Google OAuth

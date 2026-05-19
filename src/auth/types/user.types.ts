@@ -1,6 +1,6 @@
 import { type Request } from 'express';
 
-// google SignIn
+// google SignIn Type
 export interface User {
   email: string;
   firstName: string;
@@ -9,16 +9,20 @@ export interface User {
   provider: string;
 }
 
+// Create Account Type
 export interface createAccountData {
   email: string;
   userName: string;
   token: string;
 }
 
-// Login User
+// Login User Type
 export type UserSignin = Pick<User, 'email'> & {
   password: string;
 };
+
+// Reset Password Type
+export type ResetPasswordType = Pick<User, 'email'>;
 
 // OAuth user types
 export interface RequestWithUser extends Request {

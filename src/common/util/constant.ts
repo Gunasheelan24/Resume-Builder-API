@@ -11,10 +11,13 @@ export function sentBackResponse<DataType>(
 }
 
 export const HttpResponseMessages = {
-  userVerification: 'User Verification Successfull',
+  userVerification: 'User verification successfull',
+  sentEmailSuccess: 'Email sent Successfull',
 };
 
 export const HttpResponseFailedMessages = {
   invalidUser: 'Invalid credentials',
   userExist: 'user Already Exist',
+  somethingWentWrong: 'Something went wrong',
+  failedToSentEmail: 'Failed to sent email',
 };

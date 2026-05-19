@@ -4,7 +4,9 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  ManyToOne,
 } from 'typeorm';
+import { OtpEntity } from './otp';
 
 @Entity({ name: 'users' })
 export class UserEntity {
@@ -28,6 +30,9 @@ export class UserEntity {
 
   @Column({ type: 'varchar', default: 'local' })
   provider!: string;
+
+  @ManyToOne(() => OtpEntity, (otp) => otp.user)
+  otp!: OtpEntity[];
 
   @Column({ type: 'varchar' })
   @CreateDateColumn({ name: 'created_date' })

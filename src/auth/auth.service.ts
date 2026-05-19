@@ -1,6 +1,11 @@
 import bcrypt from 'bcryptjs';
 
-import { HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from './entities/user.entity';
@@ -15,9 +20,13 @@ import {
 import type {
   createAccountData,
   RequestWithUser,
+  ResetPasswordType,
   UserSignin,
 } from './types/user.types';
-import { ApiError } from 'src/common/types/global-types';
+import { EmailClientService } from 'src/email/email-client.service';
+import { generateOtpHandler } from 'src/common/util/global.method';
+import { SendEmailType } from 'src/email/types/email.types';
+import { OtpEntity } from './entities/otp';
 
 @Injectable()
 export class AuthService {
@@ -28,7 +37,10 @@ export class AuthService {
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
+    @InjectRepository(OtpEntity)
+    private readonly otpRepository: Repository<OtpEntity>,
     private readonly jwtService: JwtService,
+    private readonly emailService: EmailClientService,
   ) {}
 
   async createAccount(body: CreateUserDto) {
@@ -133,6 +145,68 @@ export class AuthService {
     } catch (error) {
       if (error instanceof Error) {
         this.logger.warn(error.message, error.stack);
+      } else {
+        this.logger.warn('unknow error');
+      }
+
+      throw error;
+    }
+  }
+
+  async sentResetPasswordOtp(body: ResetPasswordType) {
+    try {
+      // check the user exist or not
+      const userDetails = await this.userRepository.findOne({
+        where: { email: body.email },
+      });
+
+      if (userDetails) {
+        // generate otp
+        const generateOtp = generateOtpHandler();
+
+        // payload
+        const emailPayload: SendEmailType = {
+          otp: generateOtp,
+          to: body.email,
+          subject: 'Password Reset Verification Code',
+          userName: userDetails?.fullName,
+        };
+
+        // now for the email we need to sent the otp with a link
+        const mailResponse =
+          await this.emailService.prepareEmailObject(emailPayload);
+
+        // Here saving the otp to db
+        const createOtp = this.otpRepository.create({
+          otp: generateOtp,
+          user: userDetails,
+        });
+
+        await this.otpRepository.save(createOtp);
+
+        // Sent back response
+        if (mailResponse?.length > 0 && mailResponse?.[0]?.statusCode == 202) {
+          return sentBackResponse<{ email: string; message: string }>(
+            {
+              email: body.email,
+              message: HttpResponseMessages.sentEmailSuccess,
+            },
+            HttpStatus.CREATED,
+          );
+        }
+
+        // if the email sent failed
+        throw new HttpException(
+          HttpResponseFailedMessages.failedToSentEmail,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      // if user does't exist
+      throw new UnauthorizedException(HttpResponseFailedMessages.invalidUser);
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error(error.message, error.stack);
       } else {
         this.logger.warn('unknow error');
       }

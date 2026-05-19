@@ -9,10 +9,11 @@ import { ENV } from 'src/common/util/env.constants';
 import { GoogleStrategyService } from './strategy/google.strategy.service';
 import { PassportModule } from '@nestjs/passport';
 import { GithubStrategyService } from './strategy/github.strategy.service';
+import { OtpEntity } from './entities/otp';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UserEntity]),
+    TypeOrmModule.forFeature([UserEntity, OtpEntity]),
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {

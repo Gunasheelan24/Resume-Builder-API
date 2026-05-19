@@ -7,6 +7,7 @@ import { ENV } from './common/util/env.constants';
 import { AuthModule } from './auth/auth.module';
 import { LoggerService } from './common/logger/logger.service';
 import { LoggerModule } from './common/logger/logger.module';
+import { EmailModule } from './email/email.module';
 
 @Module({
   imports: [
@@ -39,6 +40,8 @@ import { LoggerModule } from './common/logger/logger.module';
 
     // other goes here
     LoggerModule,
+
+    EmailModule,
   ],
   controllers: [AppController],
   providers: [AppService, LoggerService],
