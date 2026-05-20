@@ -1,5 +1,5 @@
 import { IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator';
-import { type UserSignin } from '../types/user.types';
+import { type UserSignin } from '../types/types';
 
 export class SigninUserDto implements UserSignin {
   @IsNotEmpty()

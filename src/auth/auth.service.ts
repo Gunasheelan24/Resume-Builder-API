@@ -22,11 +22,12 @@ import type {
   RequestWithUser,
   ResetPasswordType,
   UserSignin,
-} from './types/user.types';
+} from './types/types';
 import { EmailClientService } from 'src/email/email-client.service';
 import { generateOtpHandler } from 'src/common/util/global.method';
 import { SendEmailType } from 'src/email/types/email.types';
 import { OtpEntity } from './entities/otp';
+import { VerifyOtpDto } from './dto/otp-user';
 
 @Injectable()
 export class AuthService {
@@ -164,6 +165,9 @@ export class AuthService {
         // generate otp
         const generateOtp = generateOtpHandler();
 
+        // hasing the otp
+        const hashedOtp = await this.hashPassword(generateOtp);
+
         // payload
         const emailPayload: SendEmailType = {
           otp: generateOtp,
@@ -178,7 +182,7 @@ export class AuthService {
 
         // Here saving the otp to db
         const createOtp = this.otpRepository.create({
-          otp: generateOtp,
+          otp: hashedOtp,
           user: userDetails,
         });
 
@@ -203,6 +207,69 @@ export class AuthService {
       }
 
       // if user does't exist
+      throw new UnauthorizedException(HttpResponseFailedMessages.invalidUser);
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error(error.message, error.stack);
+      } else {
+        this.logger.warn('unknow error');
+      }
+
+      throw error;
+    }
+  }
+
+  async verifyOneTimePasswordService(body: VerifyOtpDto) {
+    try {
+      // get userDetails And Latest OTP
+      const userDetail = await this.userRepository.findOne({
+        where: { email: body.email },
+        relations: {
+          otp: {
+            user: true,
+          },
+        },
+        order: {
+          otp: {
+            createdDate: 'DESC',
+          },
+        },
+      });
+
+      if (userDetail) {
+        if (body.password !== body.confirmPassword) {
+          throw new UnauthorizedException('Password doest match');
+        }
+
+        // check the otp and hashed otp
+        const compareOtp = await this.comparePassword(
+          body.otp,
+          userDetail?.otp[0]?.otp,
+        );
+
+        if (compareOtp) {
+          // now we need to hash the password
+          const hashPassword = await this.hashPassword(body.password);
+
+          // now we need to update the password
+          await this.userRepository.update(
+            { email: body.email },
+            { password: hashPassword },
+          );
+
+          return sentBackResponse<{ message: string; email: string }>(
+            {
+              message: HttpResponseMessages.resetPasswordSuccess,
+              email: body.email,
+            },
+            HttpStatus.CREATED,
+          );
+        }
+
+        throw new UnauthorizedException(HttpResponseFailedMessages.invalidUser);
+      }
+
+      // if user not exist throw error
       throw new UnauthorizedException(HttpResponseFailedMessages.invalidUser);
     } catch (error) {
       if (error instanceof Error) {

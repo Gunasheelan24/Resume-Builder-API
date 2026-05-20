@@ -24,6 +24,11 @@ export type UserSignin = Pick<User, 'email'> & {
 // Reset Password Type
 export type ResetPasswordType = Pick<User, 'email'>;
 
+// Verify OTP Types
+export interface VerifyOTP {
+  otp: string;
+}
+
 // OAuth user types
 export interface RequestWithUser extends Request {
   user: User;

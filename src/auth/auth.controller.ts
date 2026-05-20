@@ -3,8 +3,9 @@ import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/create-user';
 import { SigninUserDto } from './dto/signin-user';
 import { AuthGuard } from '@nestjs/passport';
-import { type RequestWithUser } from './types/user.types';
+import { type RequestWithUser } from './types/types';
 import { ResetPasswordDto } from './dto/reset-password';
+import { VerifyOtpDto } from './dto/otp-user';
 
 @Controller('auth')
 export class AuthController {
@@ -26,6 +27,12 @@ export class AuthController {
   @Post('reset-password')
   sentRestPasswordOtp(@Body() body: ResetPasswordDto) {
     return this.authService.sentResetPasswordOtp(body);
+  }
+
+  // verify OTP
+  @Post('verify-otp')
+  verifyOneTimePassword(@Body() body: VerifyOtpDto) {
+    return this.authService.verifyOneTimePasswordService(body);
   }
 
   // Google OAuth

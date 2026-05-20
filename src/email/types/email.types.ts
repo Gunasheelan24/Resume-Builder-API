@@ -1,6 +1,6 @@
 export interface SendEmailType {
   to: string;
   userName: string;
-  otp: number;
+  otp: string;
   subject: string;
 }

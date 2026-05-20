@@ -19,7 +19,7 @@ export class OtpEntity {
   user!: UserEntity;
 
   @Column()
-  otp!: number;
+  otp!: string;
 
   @CreateDateColumn({ name: 'created_date' })
   createdDate!: Date;

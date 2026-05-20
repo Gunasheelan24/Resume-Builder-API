@@ -13,6 +13,7 @@ export function sentBackResponse<DataType>(
 export const HttpResponseMessages = {
   userVerification: 'User verification successfull',
   sentEmailSuccess: 'Email sent Successfull',
+  resetPasswordSuccess: 'Reset password successfull',
 };
 
 export const HttpResponseFailedMessages = {
