@@ -82,12 +82,11 @@ export class AuthService {
           token: jwtToken,
         };
 
-        return sentBackResponse<{
-          data: createAccountData;
-          message: string;
-        }>(
-          { data: responsePayload, message: 'User Created Successfull' },
+        return sentBackResponse<createAccountData>(
+          { ...responsePayload },
           HttpStatus.CREATED,
+          true,
+          'User Created Successfull',
         );
       }
 
