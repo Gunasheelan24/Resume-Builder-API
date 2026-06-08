@@ -2,11 +2,13 @@ export function sentBackResponse<DataType>(
   data: DataType,
   statusCode: number,
   isSuccessResponse = true,
+  message?: string,
 ) {
   return {
     statusCode,
     data,
     isSuccessResponse,
+    message,
   };
 }
 

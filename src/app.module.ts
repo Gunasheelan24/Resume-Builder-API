@@ -35,12 +35,9 @@ import { EmailModule } from './email/email.module';
     }),
 
     AuthModule,
-
     LoggerModule,
-
     // other goes here
     LoggerModule,
-
     EmailModule,
   ],
   controllers: [AppController],

@@ -110,7 +110,7 @@ export class AuthService {
       const { email, password } = body;
       const getUser = await this.userRepository.findOne({
         where: { email },
-        select: { password: true, email: true, provider: true },
+        select: { password: true, email: true, provider: true, userName: true },
       });
 
       // invalid error
@@ -136,12 +136,19 @@ export class AuthService {
       const generatedJwt = await this.generateJwtToken(jwtPayload);
 
       // sent back response
-      return sentBackResponse<{ data: createAccountData; message: string }>(
+      return sentBackResponse<{
+        email: string;
+        userName: string;
+        token: string;
+      }>(
         {
-          data: { email, token: generatedJwt, userName: getUser.userName },
-          message: HttpResponseMessages.userVerification,
+          email,
+          token: generatedJwt,
+          userName: getUser.userName,
         },
         HttpStatus.ACCEPTED,
+        true,
+        HttpResponseMessages.userVerification,
       );
     } catch (error) {
       if (error instanceof Error) {
