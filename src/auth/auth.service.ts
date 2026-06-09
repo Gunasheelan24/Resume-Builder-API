@@ -196,12 +196,11 @@ export class AuthService {
 
         // Sent back response
         if (mailResponse?.length > 0 && mailResponse?.[0]?.statusCode == 202) {
-          return sentBackResponse<{ email: string; message: string }>(
-            {
-              email: body.email,
-              message: HttpResponseMessages.sentEmailSuccess,
-            },
+          return sentBackResponse<{ email: string }>(
+            { email: body.email },
             HttpStatus.CREATED,
+            true,
+            HttpResponseMessages.sentEmailSuccess,
           );
         }
 
@@ -263,12 +262,13 @@ export class AuthService {
             { password: hashPassword },
           );
 
-          return sentBackResponse<{ message: string; email: string }>(
+          return sentBackResponse<{ email: string }>(
             {
-              message: HttpResponseMessages.resetPasswordSuccess,
               email: body.email,
             },
             HttpStatus.CREATED,
+            true,
+            HttpResponseMessages.resetPasswordSuccess,
           );
         }
 
