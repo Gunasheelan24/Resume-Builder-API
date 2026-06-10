@@ -3,4 +3,4 @@ export interface SendEmailType {
   userName: string;
   otp: string;
   subject: string;
-}
+} 
